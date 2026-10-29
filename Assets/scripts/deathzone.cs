@@ -2,42 +2,16 @@ using UnityEngine;
 
 public class DeathZone : MonoBehaviour
 {
-    public Transform respawnPoint; // Where the player will teleport to
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            // Safety check in case you forgot to drag the respawn point in
-            if (respawnPoint == null)
+            PlayerHealth health = other.GetComponent<PlayerHealth>();
+            if (health != null)
             {
-                Debug.LogError("ERROR: Respawn Point is not assigned on the DeathZone object in the Inspector!");
-                return;
+                // Instantly deal enough damage to trigger death and respawn at the last touched checkpoint
+                health.TakeDamage(health.maxHealth);
             }
-
-            // If using a Character Controller component, disable it briefly to allow instant repositioning
-            CharacterController controller = other.GetComponent<CharacterController>();
-            if (controller != null)
-            {
-                controller.enabled = false;
-                other.transform.position = respawnPoint.position;
-                controller.enabled = true;
-            }
-            else
-            {
-                // Basic transform movement
-                other.transform.position = respawnPoint.position;
-            }
-
-            // Reset velocity if your player uses a Rigidbody so they don't keep falling
-            Rigidbody rb = other.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.velocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-
-            Debug.Log("Player respawned successfully!");
         }
     }
 }
